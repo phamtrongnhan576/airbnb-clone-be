@@ -5,5 +5,6 @@ import { RoomDetailController } from './room-detail.controller';
 @Module({
   controllers: [RoomDetailController],
   providers: [RoomDetailService],
+  exports: [RoomDetailService],
 })
 export class RoomDetailModule {}
