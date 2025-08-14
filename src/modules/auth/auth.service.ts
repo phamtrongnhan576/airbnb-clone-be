@@ -45,26 +45,18 @@ export class AuthService {
     const user = await this.prisma.users.findUnique({
       where: { email: dto.email },
     });
+
     if (!user) throw new BadRequestException('Invalid credentials');
 
     const checkPassword = await bcrypt.compare(dto.password, user.password);
     if (!checkPassword) throw new BadRequestException('Invalid credentials');
 
     const tokens = await this.tokenService.createTokens(user.id);
-    const safeUser = { id: user.id, name: user.name, email: user.email };
+
+    // Loại bỏ password trước khi trả về
+    const { password, ...safeUser } = user;
 
     return { user: safeUser, tokens };
-  }
-
-  /** Lấy thông tin user hiện tại */
-
-  async me(userId: number) {
-    const user = await this.prisma.users.findUnique({
-      where: { id: userId },
-      select: { id: true, name: true, email: true, createdAt: true },
-    });
-    if (!user) throw new UnauthorizedException();
-    return user;
   }
 
   /** Refresh token */

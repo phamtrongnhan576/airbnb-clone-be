@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Post,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -16,23 +8,22 @@ import {
   setAuthCookies,
   clearAuthCookies,
 } from '@/src/common/utils/cookie.util';
-import { JwtAuthGuard } from '@/src/modules/auth/protect/guards/auth.guard';
-import { JwtRefreshGuard } from '@/src/modules/auth/protect/guards/refresh.guard';
-import { User } from '@/src/common/decorator/user.decorator';
 
+import { User } from '@/src/common/decorator/user.decorator';
+import { Public } from '@/src/common/decorator/is-public.decorator';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
-
+  @Public()
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     const result = await this.auth.register(dto);
     return { data: result, message: 'User registered successfully' };
   }
 
+  @Public()
   @Post('login')
-  @HttpCode(200)
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -42,13 +33,6 @@ export class AuthController {
     return { data: user, message: 'Logged in successfully' };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('me')
-  async me(@User() user: any) {
-    const profile = await this.auth.me(user.userId);
-    return { data: profile, message: 'User profile fetched successfully' };
-  }
-  @UseGuards(JwtRefreshGuard)
   @Post('refresh')
   async refresh(@User() user: any) {
     const tokens = await this.auth.issueTokens(user.userId);

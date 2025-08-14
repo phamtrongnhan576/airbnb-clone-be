@@ -1,14 +1,19 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UserModule } from './modules/user/user.module';
 import { TokenModule } from './modules/token/token.module';
+import { protectStrategy } from './modules/auth/protect/strategies/protect.strategy';
+import { ConfigModule } from '@nestjs/config/dist/config.module';
 
 @Module({
-  imports: [AuthModule, UserModule, PrismaModule, TokenModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
+    UserModule,
+    PrismaModule,
+    TokenModule,
+  ],
+  providers: [protectStrategy],
 })
 export class AppModule {}

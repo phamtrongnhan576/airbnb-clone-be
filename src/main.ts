@@ -1,21 +1,24 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
-import { PORT } from './common/constants/init.constant';
 import { ResponseInterceptor } from '@/src/common/interceptors/response.interceptor';
-
+import { AuthenticationGuard } from '@/src/modules/auth/protect/guards/protect.guard';
+import { ConfigService } from '@nestjs/config/dist/config.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use((cookieParser as any).default());
+
+  const configService = app.get(ConfigService);
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
     credentials: true,
   });
 
+  const reflector = app.get(Reflector);
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalPipes(
     new ValidationPipe({
@@ -24,12 +27,12 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.useGlobalGuards(new AuthenticationGuard(reflector));
 
   const config = new DocumentBuilder()
     .setTitle('Airbnb Clone API')
     .setDescription('Auth via httpOnly cookies (JWT)')
     .setVersion('1.0.0')
-    .addCookieAuth('access_token')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -38,8 +41,9 @@ async function bootstrap() {
   });
 
   const logger = new Logger('Bootstrap');
-  await app.listen(PORT, () => {
-    logger.log(`Server running on port ${PORT}`);
+  const port = configService.get<number>('PORT') || 3000;
+  await app.listen(port, () => {
+    logger.log(`Server running on port http://localhost:${port}`);
   });
 }
 bootstrap();

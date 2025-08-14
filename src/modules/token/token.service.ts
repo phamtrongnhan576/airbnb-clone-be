@@ -1,15 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import {
-  ACCESS_TOKEN_SECRET,
-  ACCESS_TOKEN_EXPIRES,
-  REFRESH_TOKEN_SECRET,
-  REFRESH_TOKEN_EXPIRES,
-} from '@/src/common/constants/init.constant';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TokenService {
-  constructor(private readonly jwt: JwtService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async createTokens(userId: number) {
     if (!userId) {
@@ -18,12 +16,18 @@ export class TokenService {
 
     const access = await this.jwt.signAsync(
       { sub: userId },
-      { secret: ACCESS_TOKEN_SECRET, expiresIn: ACCESS_TOKEN_EXPIRES },
+      {
+        secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
+        expiresIn: this.configService.get<string>('ACCESS_TOKEN_EXPIRES'),
+      },
     );
 
     const refresh = await this.jwt.signAsync(
       { sub: userId },
-      { secret: REFRESH_TOKEN_SECRET, expiresIn: REFRESH_TOKEN_EXPIRES },
+      {
+        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+        expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRES'),
+      },
     );
 
     return { access, refresh };
@@ -32,11 +36,13 @@ export class TokenService {
   verifyAccessToken(token: string, ignoreExpiration = false) {
     return this.jwt.verify(token, {
       ignoreExpiration,
-      secret: ACCESS_TOKEN_SECRET,
+      secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
     });
   }
 
   verifyRefreshToken(token: string) {
-    return this.jwt.verify(token, { secret: REFRESH_TOKEN_SECRET });
+    return this.jwt.verify(token, {
+      secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+    });
   }
 }
