@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ExecutionContext,
   ForbiddenException,
   Injectable,
@@ -21,25 +20,44 @@ export class AuthenticationGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
-    
-    if (isPublic) {
-      return true;
-    }
 
-    return super.canActivate(context);
+    if (isPublic) return true;
+
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>('roles', [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    const canActivate = super.canActivate(context) as
+      | boolean
+      | Promise<boolean>;
+
+    return Promise.resolve(canActivate).then((result) => {
+      if (!result) return false;
+
+      const request = context.switchToHttp().getRequest();
+      const user = request.user;
+
+      if (requiredRoles && !requiredRoles.includes(user.role)) {
+        throw new ForbiddenException(
+          'You do not have permission to access this resource',
+        );
+      }
+
+      return true;
+    });
   }
 
   handleRequest(err, user, info) {
     if (err || info) {
       if (info instanceof TokenExpiredError) {
-        throw new ForbiddenException('Token hết hạn');
+        throw new ForbiddenException('Token has expired');
       }
       if (info instanceof JsonWebTokenError) {
-        throw new UnauthorizedException('Token không hợp lệ');
+        throw new UnauthorizedException('Invalid token');
       }
       throw err || new UnauthorizedException();
     }
-
     return user;
   }
 }

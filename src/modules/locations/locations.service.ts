@@ -1,26 +1,51 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '@/src/modules/prisma/prisma.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 
 @Injectable()
 export class LocationsService {
-  create(createLocationDto: CreateLocationDto) {
-    return 'This action adds a new location';
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreateLocationDto) {
+    return this.prisma.locations.create({
+      data: dto,
+    });
   }
 
-  findAll() {
-    return `This action returns all locations`;
+  async findAll() {
+    return this.prisma.locations.findMany({
+      where: { isDeleted: false },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} location`;
+  async findOne(id: number) {
+    const location = await this.prisma.locations.findUnique({
+      where: { id },
+    });
+    if (!location || location.isDeleted) {
+      throw new NotFoundException('Location not found');
+    }
+    return location;
   }
 
-  update(id: number, updateLocationDto: UpdateLocationDto) {
-    return `This action updates a #${id} location`;
+  async update(id: number, dto: UpdateLocationDto) {
+    await this.findOne(id);
+    return this.prisma.locations.update({
+      where: { id },
+      data: { ...dto, updatedAt: new Date() },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} location`;
+  async remove(id: number, deletedBy = 0) {
+    await this.findOne(id);
+    return this.prisma.locations.update({
+      where: { id },
+      data: {
+        isDeleted: true,
+        deletedBy,
+        deletedAt: new Date(),
+      },
+    });
   }
 }

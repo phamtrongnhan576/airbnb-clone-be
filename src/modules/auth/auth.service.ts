@@ -27,17 +27,22 @@ export class AuthService {
     // Hash mật khẩu
     const hash = await bcrypt.hash(dto.password, 10);
 
-    // Lưu user mới
     const user = await this.prisma.users.create({
       data: {
         name: dto.name,
         email: dto.email,
+        role: dto.role || 'user',
         password: hash,
+        phone: dto.phone || null,
+        birthday: dto.birthday ? new Date(dto.birthday) : null,
+        gender: dto.gender ?? null,
+        avatar: dto.avatar || null,
       },
-      select: { id: true, name: true, email: true, createdAt: true },
     });
 
-    return user;
+    // Xoá password trước khi trả về
+    const { password, ...safeUser } = user;
+    return safeUser;
   }
 
   /** Đăng nhập */

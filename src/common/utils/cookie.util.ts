@@ -38,7 +38,7 @@ export const setAuthCookies = (
   res.cookie('refresh_token', tokens.refresh, {
     ...cookieOptions,
     maxAge: parseExpiry(process.env.REFRESH_TOKEN_EXPIRES),
-    path: '/api/auth/refresh',
+    path: '/auth/refresh',
   });
 };
 
@@ -52,6 +52,6 @@ export const clearAuthCookies = (res: Response) => {
   res.clearCookie('access_token', { ...cookieOptions, path: '/' });
   res.clearCookie('refresh_token', {
     ...cookieOptions,
-    path: '/api/auth/refresh',
+    path: '/auth/refresh',
   });
 };
