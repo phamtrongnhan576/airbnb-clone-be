@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '@/src/modules/prisma/prisma.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
@@ -8,14 +12,44 @@ export class LocationsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateLocationDto) {
+    const existed = await this.prisma.locations.findUnique({
+      where: {
+        name_province: {
+          name: dto.name,
+          province: dto.province ?? '',
+        },
+      },
+    });
+
+    if (existed) {
+      throw new BadRequestException('Location already exists');
+    }
+
     return this.prisma.locations.create({
-      data: dto,
+      data: {
+        ...dto,
+        province: dto.province ?? null,
+        country: dto.country ?? null,
+        image: dto.image ?? null,
+      },
     });
   }
 
   async findAll() {
     return this.prisma.locations.findMany({
       where: { isDeleted: false },
+    });
+  }
+
+  async search(keyword: string) {
+    if (!keyword) return [];
+    return this.prisma.locations.findMany({
+      where: {
+        name: {
+          contains: keyword.toLowerCase(),
+        },
+      },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

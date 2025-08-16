@@ -29,17 +29,20 @@ model Bookings {
 }
 
 model Locations {
-  id        Int       @id @default(autoincrement())
-  name      String    @db.VarChar(100)
-  province  String?   @db.VarChar(100)
-  country   String?   @db.VarChar(100)
-  image     String?   @db.VarChar(255)
-  deletedBy Int       @default(0)
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime? @db.Timestamp(0)
-  createdAt DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt DateTime  @default(now()) @db.Timestamp(0)
-  Rooms     Rooms[]
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(100)
+  province    String?   @db.VarChar(100)
+  country     String?   @db.VarChar(100)
+  image       String?   @db.VarChar(255)
+  description String?   @db.Text
+  deletedBy   Int       @default(0)
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime? @db.Timestamp(0)
+  createdAt   DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime  @default(now()) @db.Timestamp(0)
+  Rooms       Rooms[]
+
+  @@unique([name, province], map: "uq_location_name_province")
 }
 
 model RoomDetail {

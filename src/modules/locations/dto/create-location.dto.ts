@@ -7,18 +7,31 @@ export class CreateLocationDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 'Hà Nội', required: false })
+  @ApiProperty({ example: 'Hà Nội', required: false, nullable: true })
   @IsOptional()
   @IsString()
-  province?: string;
+  province?: string | null;
 
-  @ApiProperty({ example: 'Việt Nam', required: false })
+  @ApiProperty({ example: 'Việt Nam', required: false, nullable: true })
   @IsOptional()
   @IsString()
-  country?: string;
+  country?: string | null;
 
-  @ApiProperty({ example: 'https://example.com/image.jpg', required: false })
+  @ApiProperty({
+    example: 'https://example.com/image.jpg',
+    required: false,
+    nullable: true,
+  })
   @IsOptional()
-  @IsUrl()
-  image?: string;
+  @IsString()
+  image?: string | null;
+
+  @ApiProperty({
+    example: 'Thủ đô ngàn năm văn hiến',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  description?: string | null;
 }

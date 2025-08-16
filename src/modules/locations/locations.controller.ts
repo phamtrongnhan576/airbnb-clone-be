@@ -7,6 +7,7 @@ import {
   Delete,
   Put,
   ParseIntPipe,
+  UseInterceptors,
 } from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { CreateLocationDto } from './dto/create-location.dto';
@@ -14,13 +15,18 @@ import { UpdateLocationDto } from './dto/update-location.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Roles } from '@/src/common/decorator/role.decorator';
 import { Public } from '@/src/common/decorator/is-public.decorator';
+import { LocationUploadInterceptor } from '@/src/common/multer/cloudinary/cloudinary.multer';
+import { ApiLocationUpload } from '@/src/common/swagger/location.swagger';
+import { Query } from '@nestjs/common';
 @ApiTags('Locations')
 @Controller('locations')
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
 
+  @ApiLocationUpload()
   @Roles('admin')
   @Post()
+  @UseInterceptors(LocationUploadInterceptor)
   async create(@Body() dto: CreateLocationDto) {
     const location = await this.locationsService.create(dto);
     return {
@@ -38,6 +44,17 @@ export class LocationsController {
       message: 'Locations fetched successfully',
     };
   }
+
+  @Public()
+  @Get('search')
+  async search(@Query('keyword') keyword: string) {
+    const locations = await this.locationsService.search(keyword);
+    return {
+      data: locations,
+      message: 'Search locations successfully',
+    };
+  }
+
   @Public()
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
