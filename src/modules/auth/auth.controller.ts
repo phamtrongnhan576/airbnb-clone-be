@@ -49,7 +49,7 @@ export class AuthController {
 
   @Post('refresh')
   async refresh(@Req() req: Request) {
-    const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+    const refreshToken = req.cookies?.refresh_token || req.body.refresh_token;
     if (!refreshToken) {
       throw new BadRequestException('Missing refresh token');
     }

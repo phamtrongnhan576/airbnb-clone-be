@@ -83,7 +83,7 @@ export class BookingController {
 
   @Roles('admin', 'user')
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) @User() user: any, id: number) {
+  async remove(@Param('id', ParseIntPipe) id: number, @User() user: any) {
     const data = await this.bookingService.remove(id, user);
     return {
       statusCode: HttpStatus.OK,
