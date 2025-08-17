@@ -9,7 +9,6 @@ import { RoomsModule } from '@/src/modules/rooms/rooms.module';
 import { UsersModule } from '@/src/modules/users/users.module';
 import { LocationsModule } from '@/src/modules/locations/locations.module';
 import { CommentsModule } from '@/src/modules/comments/comments.module';
-import { RoomDetailModule } from '@/src/modules/room-detail/room-detail.module';
 
 @Module({
   imports: [
@@ -22,7 +21,6 @@ import { RoomDetailModule } from '@/src/modules/room-detail/room-detail.module';
     UsersModule,
     LocationsModule,
     CommentsModule,
-    RoomDetailModule,
   ],
   providers: [protectStrategy],
 })

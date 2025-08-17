@@ -1,8 +1,12 @@
-import { cloudinary } from '@/src/common/cloudinary/init.cloudinary';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { cloudinary } from '@/src/common/cloudinary/init.cloudinary';
 
-export function createCloudinaryInterceptor(fieldName: string, folder: string) {
+export function createCloudinaryMultiInterceptor(
+  fieldName: string,
+  folder: string,
+  maxCount: number,
+) {
   const storage = new CloudinaryStorage({
     cloudinary,
     params: {
@@ -19,17 +23,26 @@ export function createCloudinaryInterceptor(fieldName: string, folder: string) {
     } as any,
   });
 
-  return FileInterceptor(fieldName, {
+  return FilesInterceptor(fieldName, maxCount, {
     storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB mỗi ảnh
   });
 }
-export const AvatarUploadInterceptor = createCloudinaryInterceptor(
+
+export const AvatarUploadInterceptor = createCloudinaryMultiInterceptor(
   'avatar',
   'user-avatars',
+  1,
 );
 
-export const LocationUploadInterceptor = createCloudinaryInterceptor(
+export const LocationUploadInterceptor = createCloudinaryMultiInterceptor(
   'image',
   'locations',
+  1,
+);
+
+export const RoomUploadInterceptor = createCloudinaryMultiInterceptor(
+  'hinh_anh',
+  'rooms',
+  3,
 );

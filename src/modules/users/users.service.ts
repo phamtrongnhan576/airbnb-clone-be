@@ -12,9 +12,7 @@ import * as bcrypt from 'bcryptjs';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  /** Tạo user mới */
   async create(dto: CreateUserDto) {
-    // check email đã tồn tại chưa
     const existed = await this.prisma.users.findUnique({
       where: { email: dto.email },
     });
@@ -37,6 +35,18 @@ export class UsersService {
   findAll() {
     return this.prisma.users.findMany({
       where: { isDeleted: false },
+    });
+  }
+
+  async search(keyword: string) {
+    if (!keyword) return [];
+    return this.prisma.users.findMany({
+      where: {
+        name: {
+          contains: keyword.toLowerCase(),
+        },
+      },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

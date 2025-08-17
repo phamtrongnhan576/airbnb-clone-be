@@ -5,6 +5,7 @@ import {
   MinLength,
   IsOptional,
   IsString,
+  IsIn,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -26,6 +27,6 @@ export class CreateUserDto {
   avatar?: string;
 
   @ApiProperty({ example: 'user', enum: ['user', 'admin'], required: false })
-  @IsOptional()
-  role?: string | null;
+  @IsIn(['user', 'admin'])
+  role?: 'user' | 'admin';
 }

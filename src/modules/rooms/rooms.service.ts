@@ -1,26 +1,64 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '@/src/modules/prisma/prisma.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 
 @Injectable()
 export class RoomsService {
-  create(createRoomDto: CreateRoomDto) {
-    return 'This action adds a new room';
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreateRoomDto) {
+    return this.prisma.rooms.create({
+      data: dto,
+      include: { Locations: true, Users: true },
+    });
   }
 
-  findAll() {
-    return `This action returns all rooms`;
+  async findAll() {
+    return this.prisma.rooms.findMany({
+      include: { Locations: true, Users: true },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} room`;
+  async findByLocationName(name: string) {
+    const rooms = await this.prisma.rooms.findMany({
+      where: {
+        Locations: {
+          name: {
+            contains: name.toLowerCase(),
+          },
+        },
+      },
+      include: { Locations: true, Users: true },
+    });
+    return rooms;
   }
 
-  update(id: number, updateRoomDto: UpdateRoomDto) {
-    return `This action updates a #${id} room`;
+  async findOne(id: number) {
+    const room = await this.prisma.rooms.findUnique({
+      where: { id },
+      include: { Locations: true, Users: true },
+    });
+    if (!room) throw new NotFoundException(`Room ${id} not found`);
+    return room;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} room`;
+  async update(id: number, dto: UpdateRoomDto) {
+    const existed = await this.prisma.rooms.findUnique({ where: { id } });
+    if (!existed) throw new NotFoundException(`Room ${id} not found`);
+
+    return this.prisma.rooms.update({
+      where: { id },
+      data: dto,
+      include: { Locations: true, Users: true },
+    });
+  }
+
+  async remove(id: number) {
+    const existed = await this.prisma.rooms.findUnique({ where: { id } });
+    if (!existed) throw new NotFoundException(`Room ${id} not found`);
+
+    await this.prisma.rooms.delete({ where: { id } });
+    return existed;
   }
 }
