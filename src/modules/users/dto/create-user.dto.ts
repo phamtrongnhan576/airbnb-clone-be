@@ -29,4 +29,19 @@ export class CreateUserDto {
   @ApiProperty({ example: 'user', enum: ['user', 'admin'], required: false })
   @IsIn(['user', 'admin'])
   role?: 'user' | 'admin';
+  
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  birthday?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  gender?: string;
 }

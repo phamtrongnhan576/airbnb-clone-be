@@ -21,7 +21,7 @@ import type { Request } from 'express';
 import { AvatarUploadInterceptor } from '@/src/common/multer/cloudinary/cloudinary.multer';
 import { ApiAvatarUpload } from '@/src/common/swagger/upload-avatar.swagger';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}

@@ -59,9 +59,14 @@ export class UsersService {
 
   /** Cập nhật user */
   async update(id: number, dto: UpdateUserDto) {
+    if ('email' in dto) {
+      delete dto.email;
+    }
+
     await this.findOne(id);
 
-    let data: any = { ...dto };
+    const data: any = { ...dto };
+
     if (dto.password) {
       data.password = await bcrypt.hash(dto.password, 10);
     }

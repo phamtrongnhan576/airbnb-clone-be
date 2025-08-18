@@ -45,9 +45,12 @@ export class BookingService {
   }
 
   /** Lấy booking theo user */
-  async findByUserId(userId: number) {
+  async findByUserId(userId: number, includeDeleted = false) {
     return this.prisma.bookings.findMany({
-      where: { user_id: userId, isDeleted: false },
+      where: {
+        user_id: userId,
+        ...(includeDeleted ? {} : { isDeleted: false }),
+      },
       include: { Users: true, Rooms: true },
     });
   }
